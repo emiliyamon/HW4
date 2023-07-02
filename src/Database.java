@@ -83,11 +83,15 @@ public class Database {
      * the function will block the thread until it can read
      */
     // avoid Busy Waiting as much as possible
-    public void readAcquire() throws InterruptedException {
+    public void readAcquire() {
         lock.lock();
         try {
             while (isWriting || activeReaders >= maxNumOfReaders) {
-                readCondition.await();
+                try {
+                    readCondition.wait();
+                } catch (InterruptedException ie) {
+
+                }
             }
             activeReaders++;
         } finally {
@@ -123,11 +127,15 @@ public class Database {
      * the function will block the thread until it can write
      */
     // avoid Busy Waiting as much as possible
-    public void writeAcquire() throws InterruptedException {
+    public void writeAcquire() {
        lock.lock();
        try {
            while (isWriting || activeReaders > 0) {
-               writeCondition.await();
+               try {
+                   readCondition.wait();
+               } catch (InterruptedException ie) {
+
+               }
            }
            isWriting = true;
        } finally {
