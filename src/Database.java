@@ -88,7 +88,7 @@ public class Database {
         try {
             while (isWriting || activeReaders >= maxNumOfReaders) {
                 try {
-                    readCondition.wait();
+                    readCondition.await();
                 } catch (InterruptedException ie) {
 
                 }
@@ -132,7 +132,7 @@ public class Database {
        try {
            while (isWriting || activeReaders > 0) {
                try {
-                   readCondition.wait();
+                   writeCondition.await();
                } catch (InterruptedException ie) {
 
                }
