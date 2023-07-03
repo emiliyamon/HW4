@@ -7,7 +7,7 @@ public class PathFromRoot {
             return false;
         }
         String copy = str.substring(1);
-        return doesPathExist(root.getLeft(), copy) && doesPathExist(root.getRight(), copy);
+        return doesPathExist(root.getLeft(), copy) || doesPathExist(root.getRight(), copy);
     }
 
 }
