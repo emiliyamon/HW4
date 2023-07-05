@@ -1,4 +1,12 @@
 public class PathFromRoot {
+    /**
+     * Function for checking if there is a path of a certain given String
+     * (Case sensitive) in the current binary tree
+     *
+     * @param root Starting root of the binary tree
+     * @param str the relevant string to check if a path of exists in the tree
+     * @return boolean value according to the result
+     */
     public static boolean doesPathExist(BinNode<Character> root, String str) {
         if (str.length() == 0) {
             return true;

@@ -56,27 +56,6 @@ public class Database {
     // do not change signatures
 
     /**
-     * can also be used before reading from the db
-     * if a thread calls on this method while another thread writes to the db using put
-     * or if k other threads read from the db using get
-     * will not block the thread
-     * @return boolean value according to the test - if thread can start reading or not
-     */
-    public boolean readTryAcquire() {
-        lock.lock();
-        try {
-            if (isWriting || activeReaders >= maxNumOfReaders) {
-                return false;
-            } else {
-                activeReaders++;
-                return true;
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
      * will be used before reading from the db
      * if a thread calls on this method while another thread writes to the db using put
      * or if k other threads read from the db using get
@@ -100,6 +79,22 @@ public class Database {
     }
 
     /**
+     * can also be used before reading from the db
+     * if a thread calls on this method while another thread writes to the db using put
+     * or if k other threads read from the db using get
+     * will not block the thread
+     * @return boolean value according to the test - if thread can start reading or not
+     */
+    public boolean readTryAcquire() {
+        if (isWriting || activeReaders >= maxNumOfReaders) {
+            return false;
+        } else {
+            activeReaders++;
+            return true;
+        }
+    }
+
+    /**
      * will be used after reading from a db
      * signal that a thread finished reading from the db
      */
@@ -112,6 +107,9 @@ public class Database {
                 throw new IllegalMonitorStateException("Illegal read release attempt");
             }
             activeReaders--;
+            if (activeReaders == maxNumOfReaders - 1) {
+                readCondition.signal();
+            }
             if (activeReaders == 0) {
                 writeCondition.signal();
             }
@@ -151,16 +149,11 @@ public class Database {
      * @return boolean value according to the test - if thread can start writing or not
      */
     public boolean writeTryAcquire() {
-        lock.lock();
-        try {
-            if (isWriting || activeReaders > 0) {
-                return false;
-            } else {
-                isWriting = true;
-                return true;
-            }
-        } finally {
-            lock.unlock();
+        if (isWriting || activeReaders > 0) {
+            return false;
+        } else {
+            isWriting = true;
+            return true;
         }
     }
 
